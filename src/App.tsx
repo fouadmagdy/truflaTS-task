@@ -18,10 +18,10 @@ interface Interested {
 const App: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [interested, setInterested] = useState<any[]>([]);
+  const [counts, setCounts] = useState<any>({});
 
   useEffect(() => {
     axios.get<User, any>('./users.json').then((response) => {
-      console.log('response', response.data);
       setUsers(response.data);
     });
 
@@ -29,6 +29,18 @@ const App: React.FC = () => {
       console.log('response in', response.data);
       setInterested(response.data);
     });
+
+    const handleFollowersCount = () => {
+      const followes = users.map((user: User) => user.following);
+      const merged = [].concat.apply([], followes);
+      const counts: any = {};
+      merged.map(function (x) {
+        return (counts[x] = (counts[x] || 0) + 1);
+      });
+      setCounts(counts);
+    };
+    handleFollowersCount();
+    // eslint-disable-next-line
   }, []);
 
   const handleDeleteUser = (id: number) => {
@@ -60,7 +72,7 @@ const App: React.FC = () => {
                   <Accordion>
                     <Accordion.Item eventKey='0'>
                       <Accordion.Header>
-                        {user.name} has {user.following.length} followers
+                        {user.name} has {counts[user.id] || 0} followers
                       </Accordion.Header>
                       {user.interests && (
                         <Accordion.Body>
